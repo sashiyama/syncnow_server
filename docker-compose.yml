@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    entrypoint: ["go", "run", "src/server.go"]
+    volumes:
+      - .:/app:cached
+      - go_modules:/golang:delegated
+    ports:
+      - 3000:3000
+
+volumes:
+  go_modules:
