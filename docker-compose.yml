@@ -3,7 +3,7 @@ version: '3'
 services:
   server:
     build: .
-    entrypoint: ["go", "run", "src/server.go"]
+    entrypoint: ["go", "run", "server.go"]
     volumes:
       - .:/app:cached
       - go_modules:/golang:delegated

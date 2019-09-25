@@ -4,5 +4,8 @@ ENV APP_PATH=/app \
 
 WORKDIR ${APP_PATH}
 
-COPY go.mod go.sum ${APP_ROOT}/
+COPY src/go.mod src/go.sum ./src/
+
+WORKDIR ${APP_PATH}/src
+
 RUN go mod download
