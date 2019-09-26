@@ -6,5 +6,6 @@ import (
 )
 
 func Routes(e *echo.Echo) {
+	e.GET("/", v1.Root)
 	e.GET("/v1", v1.Root)
 }
