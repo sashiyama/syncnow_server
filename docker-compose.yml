@@ -4,11 +4,22 @@ services:
   server:
     build: .
     entrypoint: ["go", "run", "server.go"]
+    depends_on:
+      - db
+    environment:
+      POSTGRESQL_URL: postgres://postgres:@db:5432/syncnow_development?sslmode=disable
     volumes:
       - .:/app:cached
       - go_modules:/golang:delegated
     ports:
       - 3000:3000
+  db:
+    image: mdillon/postgis:11-alpine
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data:delegated
+    ports:
+      - 5432:5432
 
 volumes:
   go_modules:
+  postgresql_data:
