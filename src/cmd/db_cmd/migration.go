@@ -13,11 +13,11 @@ func createMigrationCmd() *cobra.Command {
 		Short: "create migration",
 		Args:  cobra.RangeArgs(1, 1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			out, error := exec.Command("migrate", "create", "-ext", "sql", "-dir", "db/migrations", "-seq", args[0]).CombinedOutput()
+			_, error := exec.Command("migrate", "create", "-ext", "sql", "-dir", "db/migrations", "-seq", args[0]).CombinedOutput()
 			if error != nil {
 				fmt.Printf("Command Exec Error.")
 			}
-			fmt.Printf("result: \n%s", string(out))
+			fmt.Printf("result: \n%s migration file was created.", args[0])
 
 			return nil
 		},
