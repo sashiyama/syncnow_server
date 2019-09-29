@@ -2,13 +2,15 @@ package main
 
 import (
 	"github.com/labstack/echo"
-	"net/http"
+	"github.com/sashiyama/syncnow_server/middleware"
+	"github.com/sashiyama/syncnow_server/router"
+	"github.com/sashiyama/syncnow_server/validators"
 )
 
 func main() {
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	e.Validator = validators.NewValidator()
+	middleware.Middlewares(e)
+	router.Routes(e)
 	e.Logger.Fatal(e.Start(":3000"))
 }
