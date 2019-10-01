@@ -6,6 +6,7 @@ services:
     entrypoint: ["go", "run", "server.go"]
     depends_on:
       - db
+      - maildev
     environment:
       POSTGRESQL_URL: postgres://postgres:@db:5432/syncnow_development?sslmode=disable
     volumes:
@@ -19,6 +20,11 @@ services:
       - postgresql_data:/var/lib/postgresql/data:delegated
     ports:
       - 5432:5432
+
+  maildev:
+    image: djfarrelly/maildev
+    ports:
+      - 3025:80
 
 volumes:
   go_modules:
