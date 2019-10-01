@@ -7,6 +7,7 @@ require (
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/leodido/go-urn v1.1.0 // indirect
+	github.com/lib/pq v1.2.0
 	github.com/spf13/cobra v0.0.5
 	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392 // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
