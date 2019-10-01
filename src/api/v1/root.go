@@ -6,6 +6,6 @@ import (
 	"net/http"
 )
 
-func Root(c echo.Context) error {
+func (h *Handler) Root(c echo.Context) error {
 	return c.JSON(http.StatusOK, &Message{Message: "There are SyncNow APIs in here."})
 }
