@@ -5,7 +5,7 @@ import (
 )
 
 type UserRepository struct {
-	Db *sql.DB
+	DB *sql.DB
 }
 
 func (ur *UserRepository) Create() string {
