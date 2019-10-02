@@ -1,11 +1,11 @@
-package services
+package service
 
 import (
-	"github.com/sashiyama/syncnow_server/repositories"
+	"github.com/sashiyama/syncnow_server/repository"
 )
 
 type UserService struct {
-	UserRepository repositories.UserRepository
+	UserRepository repository.UserRepository
 }
 
 func (us *UserService) SignUp() string {

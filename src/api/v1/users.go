@@ -3,7 +3,7 @@ package v1
 import (
 	"fmt"
 	"github.com/labstack/echo"
-	. "github.com/sashiyama/syncnow_server/models"
+	. "github.com/sashiyama/syncnow_server/model"
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 )

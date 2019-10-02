@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"github.com/sashiyama/syncnow_server/services"
+	"github.com/sashiyama/syncnow_server/service"
 )
 
 type Handler struct {
-	UserService services.UserService
+	UserService service.UserService
 }

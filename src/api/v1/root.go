@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/labstack/echo"
-	. "github.com/sashiyama/syncnow_server/models"
+	. "github.com/sashiyama/syncnow_server/model"
 	"net/http"
 )
 
