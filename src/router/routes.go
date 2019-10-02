@@ -8,8 +8,10 @@ import (
 func Routes(e *echo.Echo, v1Handler *v1.Handler) {
 	e.GET("/", v1Handler.Root)
 
-	v1_prefix := e.Group("/v1")
-	v1_prefix.GET("", v1Handler.Root)
+	v1Prefix := e.Group("/v1")
+	v1Prefix.GET("", v1Handler.Root)
 
-	v1_prefix.POST("/users", v1Handler.CreateUser)
+	v1Prefix.POST("/users", v1Handler.CreateUser)
+
+	v1Prefix.GET("/emails/:email", v1Handler.GetRegisteredEmail)
 }
