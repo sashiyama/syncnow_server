@@ -9,7 +9,9 @@ import (
 
 func V1Handler() v1.Handler {
 	d := db.New()
-	ur := repository.UserRepository{Db: d}
+	ur := repository.UserRepository{DB: d}
+	ucr := repository.UserCredentialRepository{DB: d}
 	us := service.UserService{UserRepository: ur}
-	return v1.Handler{UserService: us}
+	ucs := service.UserCredentialService{UserCredentialRepository: ucr}
+	return v1.Handler{UserService: us, UserCredentialService: ucs}
 }
