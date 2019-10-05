@@ -7,4 +7,5 @@ import (
 
 func Middlewares(e *echo.Echo) {
 	e.Pre(middleware.RemoveTrailingSlash())
+	e.Use(middleware.Logger())
 }
