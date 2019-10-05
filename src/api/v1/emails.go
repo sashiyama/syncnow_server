@@ -9,16 +9,23 @@ import (
 
 func (h *Handler) GetRegisteredEmail(c echo.Context) (err error) {
 	email := c.Param("email")
-	isRegistered := h.UserCredentialService.IsRegistered(email)
+	isRegistered, err := h.UserService.IsRegistered(email)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
 	r := &IsRegisteredEmail{Email: email, IsRegistered: isRegistered}
 
+	if err = c.Bind(r); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 	if err = c.Validate(r); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.(validator.ValidationErrors).Error())
 	}
 
 	if isRegistered {
-		return c.JSON(http.StatusNotFound, r)
-	} else {
 		return c.JSON(http.StatusOK, r)
+	} else {
+		return c.JSON(http.StatusNotFound, r)
 	}
 }
