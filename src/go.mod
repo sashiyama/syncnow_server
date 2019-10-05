@@ -9,6 +9,7 @@ require (
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/spf13/cobra v0.0.5
+	github.com/stretchr/testify v1.4.0
 	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392
 	gopkg.in/go-playground/validator.v9 v9.29.1
 )
