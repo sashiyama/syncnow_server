@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"fmt"
 	"github.com/labstack/echo"
 	. "github.com/sashiyama/syncnow_server/model"
 	"gopkg.in/go-playground/validator.v9"
@@ -9,14 +8,17 @@ import (
 )
 
 func (h *Handler) CreateUser(c echo.Context) (err error) {
-	sign_up_user := new(SignUpUser)
-	if err = c.Bind(sign_up_user); err != nil {
+	u := new(SignUpUser)
+	if err = c.Bind(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	if err = c.Validate(sign_up_user); err != nil {
+	if err = c.Validate(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.(validator.ValidationErrors).Error())
 	}
+	_, err = h.UserService.SignUp(u)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
-	fmt.Println(h.UserService.SignUp())
-	return c.JSON(http.StatusCreated, sign_up_user)
+	return c.JSON(http.StatusCreated, u)
 }
