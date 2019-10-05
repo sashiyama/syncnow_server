@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    command: ["go", "test", "-v", "./..."]
+    depends_on:
+      - db
+    environment:
+      POSTGRESQL_URL: postgres://postgres:@db:5432/syncnow_test?sslmode=disable
+      CGO_ENABLED: 0
+    volumes:
+      - .:/app:cached
+      - test_go_modules:/golang:delegated
+  db:
+    image: mdillon/postgis:11-alpine
+    volumes:
+      - test_postgresql_data:/var/lib/postgresql/data:delegated
+    ports:
+      - 5432:5432
+
+volumes:
+  test_go_modules:
+  test_postgresql_data:
+
