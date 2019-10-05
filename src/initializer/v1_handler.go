@@ -8,7 +8,7 @@ import (
 )
 
 func V1Handler() v1.Handler {
-	d := db.New()
+	d := db.NewPostgres()
 	ur := repository.UserRepository{DB: d}
 	ucr := repository.UserCredentialRepository{DB: d}
 	tr := repository.TransactionRepository{DB: d}

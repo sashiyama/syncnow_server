@@ -2,14 +2,16 @@ package db
 
 import (
 	"database/sql"
-	_ "github.com/lib/pq"
 	"log"
-	"os"
 )
 
-func New() *sql.DB {
-	connStr := os.Getenv("POSTGRESQL_URL")
-	db, err := sql.Open("postgres", connStr)
+type Database struct {
+	DriverName     string
+	DataSourceName string
+}
+
+func (d *Database) New() *sql.DB {
+	db, err := sql.Open(d.DriverName, d.DataSourceName)
 	if err != nil {
 		log.Fatal(err)
 	}
