@@ -7,16 +7,8 @@ import (
 	"github.com/sashiyama/syncnow_server/repository"
 	"github.com/sashiyama/syncnow_server/util"
 	"github.com/stretchr/testify/assert"
-	"os"
 	"testing"
 )
-
-func TestMain(m *testing.M) {
-	util.TruncateAllTables()
-	code := m.Run()
-	util.TruncateAllTables()
-	os.Exit(code)
-}
 
 func TestUserRepositoryCreate(t *testing.T) {
 	d := db.NewPostgres()
@@ -32,16 +24,13 @@ func TestUserRepositoryCreate(t *testing.T) {
 		tr := repository.TransactionRepository{DB: d}
 		tr.Transaction(func(tx *sql.Tx) error {
 			_, err := ur.Create(repository.UserCreateParam{Tx: tx})
-			if err != nil {
-				return err
-			}
 			return err
 		})
 
 		var userId string
 		d.QueryRow("SELECT id FROM users;").Scan(&userId)
 
-		assert.NotNil(t, userId)
+		assert.NotEmpty(t, userId)
 
 		util.TruncateAllTables()
 	})
@@ -56,7 +45,7 @@ func TestUserRepositoryCreate(t *testing.T) {
 		var userId string
 		d.QueryRow("SELECT id FROM users;").Scan(&userId)
 
-		assert.Equal(t, userId, "")
+		assert.Empty(t, userId)
 
 		util.TruncateAllTables()
 	})
