@@ -9,11 +9,11 @@ type TransactionRepository struct {
 	DB *sql.DB
 }
 
-func (tr *TransactionRepository) Transaction(txFunc func(*sql.Tx) error) error {
+func (tr *TransactionRepository) Transaction(txFunc func(*sql.Tx) (interface{}, error)) (interface{}, error) {
 	log.Println("TRANSACTION [BEGIN]")
 	tx, err := tr.DB.Begin()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer func() {
@@ -30,6 +30,6 @@ func (tr *TransactionRepository) Transaction(txFunc func(*sql.Tx) error) error {
 		}
 	}()
 
-	err = txFunc(tx)
-	return err
+	r, err := txFunc(tx)
+	return r, err
 }
