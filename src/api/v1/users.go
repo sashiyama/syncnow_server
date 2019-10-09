@@ -15,10 +15,10 @@ func (h *Handler) CreateUser(c echo.Context) (err error) {
 	if err = c.Validate(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.(validator.ValidationErrors).Error())
 	}
-	_, err = h.UserService.SignUp(u)
+	authToken, err := h.UserService.SignUp(u)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, u)
+	return c.JSON(http.StatusCreated, authToken)
 }
