@@ -22,9 +22,9 @@ func TestUserRepositoryCreate(t *testing.T) {
 
 	t.Run("When transaction and creation is successful", func(t *testing.T) {
 		tr := repository.TransactionRepository{DB: d}
-		tr.Transaction(func(tx *sql.Tx) error {
+		tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
 			_, err := ur.Create(repository.UserCreateParam{Tx: tx})
-			return err
+			return nil, err
 		})
 
 		var userId string
@@ -37,9 +37,9 @@ func TestUserRepositoryCreate(t *testing.T) {
 
 	t.Run("When transaction and creation fails", func(t *testing.T) {
 		tr := repository.TransactionRepository{DB: d}
-		tr.Transaction(func(tx *sql.Tx) error {
+		tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
 			ur.Create(repository.UserCreateParam{Tx: tx})
-			return errors.New("User creation failed")
+			return nil, errors.New("User creation failed")
 		})
 
 		var userId string
