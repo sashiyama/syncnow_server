@@ -58,9 +58,9 @@ func TestUserCredentialRepositoryCreate(t *testing.T) {
 		d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
 
 		tr := repository.TransactionRepository{DB: d}
-		tr.Transaction(func(tx *sql.Tx) error {
+		tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
 			err := ucr.Create(repository.UserCredentialCreateParam{User: signUpUser, UserId: userId})
-			return err
+			return nil, err
 		})
 
 		var id string
@@ -76,9 +76,9 @@ func TestUserCredentialRepositoryCreate(t *testing.T) {
 		d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
 
 		tr := repository.TransactionRepository{DB: d}
-		tr.Transaction(func(tx *sql.Tx) error {
+		tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
 			ucr.Create(repository.UserCredentialCreateParam{Tx: tx, User: signUpUser, UserId: userId})
-			return errors.New("User Credential creation fails")
+			return nil, errors.New("User Credential creation fails")
 		})
 
 		var id string
