@@ -5,6 +5,7 @@ import (
 	. "github.com/sashiyama/syncnow_server/model"
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
+	"time"
 )
 
 func (h *Handler) CreateUser(c echo.Context) (err error) {
@@ -15,7 +16,7 @@ func (h *Handler) CreateUser(c echo.Context) (err error) {
 	if err = c.Validate(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.(validator.ValidationErrors).Error())
 	}
-	authToken, err := h.UserService.SignUp(u)
+	authToken, err := h.UserService.SignUp(u, time.Now())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

@@ -9,12 +9,16 @@ import (
 
 func V1Handler() v1.Handler {
 	d := db.NewPostgres()
-	ur := repository.UserRepository{DB: d}
-	ucr := repository.UserCredentialRepository{DB: d}
-	tr := repository.TransactionRepository{DB: d}
+	ur := &repository.UserRepository{DB: d}
+	ucr := &repository.UserCredentialRepository{DB: d}
+	atr := &repository.AccessTokenRepository{DB: d}
+	rtr := &repository.RefreshTokenRepository{DB: d}
+	tr := &repository.TransactionRepository{DB: d}
 	us := service.UserService{
 		UserRepository:           ur,
 		UserCredentialRepository: ucr,
+		AccessTokenRepository:    atr,
+		RefreshTokenRepository:   rtr,
 		TransactionRepository:    tr,
 	}
 	return v1.Handler{UserService: us}
