@@ -14,4 +14,7 @@ func Routes(e *echo.Echo, v1Handler *v1.Handler) {
 	v1Prefix.POST("/users", v1Handler.CreateUser)
 
 	v1Prefix.GET("/emails/:email", v1Handler.GetRegisteredEmail)
+
+	v1Prefix.POST("/tokens", v1Handler.CreateAuthToken)
+	// v1Prefix.PUT("/tokens", v1Handler.UpdateAuthToken)
 }
