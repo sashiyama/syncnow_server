@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/sashiyama/syncnow_server/db"
+	. "github.com/sashiyama/syncnow_server/model"
 	"github.com/sashiyama/syncnow_server/repository"
 	"github.com/sashiyama/syncnow_server/util"
 	"github.com/stretchr/testify/assert"
@@ -49,4 +50,30 @@ func TestUserRepositoryCreate(t *testing.T) {
 
 		util.TruncateAllTables()
 	})
+}
+
+func TestUserRepositoryFindByUser(t *testing.T) {
+	var userId string
+	d := db.NewPostgres()
+	ur := repository.UserRepository{DB: d}
+	u := User{Email: "test@example.com", Password: "P@ssword!!"}
+	passwordDigest, _ := u.PasswordDigest()
+	d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
+	d.QueryRow("INSERT INTO user_credentials(id, user_id, email, password_digest) VALUES(DEFAULT, $1, $2, $3) RETURNING id;", userId, u.Email, passwordDigest)
+
+	t.Run("When user exist", func(t *testing.T) {
+		uid, err := ur.FindByUser(User{Email: "test@example.com", Password: "P@ssword!!"})
+
+		assert.Equal(t, userId, uid)
+		assert.Nil(t, err)
+	})
+
+	t.Run("When user do not exist", func(t *testing.T) {
+		uid, err := ur.FindByUser(User{Email: "test@example.com", Password: "P@ssword"})
+
+		assert.Empty(t, uid)
+		assert.NotNil(t, err)
+	})
+
+	util.TruncateAllTables()
 }

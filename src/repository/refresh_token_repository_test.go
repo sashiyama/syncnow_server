@@ -22,7 +22,7 @@ func TestRefreshTokenRepositoryCreate(t *testing.T) {
 		var accessTokenId string
 		d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
 		d.QueryRow("INSERT INTO user_access_tokens(id, user_id, token, expires_at) VALUES(DEFAULT, $1, DEFAULT, $2) RETURNING id;", userId, now.Add(24*time.Hour)).Scan(&accessTokenId)
-		p := repository.RefreshTokenCreateParam{AccessTokenId: accessTokenId, At: now}
+		p := repository.RefreshTokenParam{AccessTokenId: accessTokenId, At: now}
 
 		refreshToken, err := rtr.Create(p)
 
@@ -45,7 +45,7 @@ func TestRefreshTokenRepositoryCreate(t *testing.T) {
 
 		tr := repository.TransactionRepository{DB: d}
 		refreshToken, err := tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
-			p := repository.RefreshTokenCreateParam{AccessTokenId: accessTokenId, At: now, Tx: tx}
+			p := repository.RefreshTokenParam{AccessTokenId: accessTokenId, At: now, Tx: tx}
 			refreshToken, err := rtr.Create(p)
 			return refreshToken, err
 		})
@@ -64,7 +64,7 @@ func TestRefreshTokenRepositoryCreate(t *testing.T) {
 
 		tr := repository.TransactionRepository{DB: d}
 		_, err := tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
-			p := repository.RefreshTokenCreateParam{AccessTokenId: accessTokenId, At: now, Tx: tx}
+			p := repository.RefreshTokenParam{AccessTokenId: accessTokenId, At: now, Tx: tx}
 			refreshToken, _ := rtr.Create(p)
 			return refreshToken, errors.New("User Refresh Token creation fails")
 		})
@@ -74,6 +74,47 @@ func TestRefreshTokenRepositoryCreate(t *testing.T) {
 
 		assert.NotNil(t, err)
 		assert.Empty(t, id)
+
+		util.TruncateAllTables()
+	})
+}
+
+func TestRefreshTokenRepositoryUpdate(t *testing.T) {
+	now := time.Now()
+	d := db.NewPostgres()
+	rtr := repository.RefreshTokenRepository{DB: d}
+
+	t.Run("When not transaction", func(t *testing.T) {
+		var userId string
+		var accessTokenId string
+		d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
+		d.QueryRow("INSERT INTO user_access_tokens(id, user_id, token, expires_at) VALUES(DEFAULT, $1, DEFAULT, $2) RETURNING id;", userId, now.Add(24*time.Hour)).Scan(&accessTokenId)
+		d.QueryRow("INSERT INTO user_refresh_tokens(id, user_access_token_id, token, expires_at) VALUES(DEFAULT, $1, DEFAULT, $2)", accessTokenId, now.Add(72*time.Hour))
+		p := repository.RefreshTokenParam{AccessTokenId: accessTokenId, At: now}
+
+		refreshToken, err := rtr.Update(p)
+
+		assert.Nil(t, err)
+		assert.NotEmpty(t, refreshToken.Token)
+
+		util.TruncateAllTables()
+	})
+
+	t.Run("When transaction and creation fails", func(t *testing.T) {
+		var userId string
+		var accessTokenId string
+		d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
+		d.QueryRow("INSERT INTO user_access_tokens(id, user_id, token, expires_at) VALUES(DEFAULT, $1, DEFAULT, $2);", userId, now.Add(24*time.Hour)).Scan(&accessTokenId)
+		d.QueryRow("INSERT INTO user_refresh_tokens(id, user_access_token_id, token, expires_at) VALUES(DEFAULT, $1, DEFAULT, $2)", accessTokenId, now.Add(72*time.Hour))
+
+		tr := repository.TransactionRepository{DB: d}
+		_, err := tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
+			p := repository.RefreshTokenParam{AccessTokenId: accessTokenId, At: time.Now(), Tx: tx}
+			refreshToken, _ := rtr.Update(p)
+			return refreshToken, errors.New("User Refresh Token creation fails")
+		})
+
+		assert.NotNil(t, err)
 
 		util.TruncateAllTables()
 	})

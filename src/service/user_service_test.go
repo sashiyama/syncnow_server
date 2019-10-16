@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-type UserRepositoryStub struct{}
-type UserRepositoryErrorStub struct{}
+type UserRepositoryStub struct{ UserRepository }
+type UserRepositoryErrorStub struct{ UserRepository }
 type UserCredentialRepositoryStub struct{}
-type AccessTokenRepositoryStub struct{}
-type RefreshTokenRepositoryStub struct{}
+type AccessTokenRepositoryStub struct{ AccessTokenRepository }
+type RefreshTokenRepositoryStub struct{ RefreshTokenRepository }
 type TransactionRepositoryStub struct{}
 
 func (urs *UserRepositoryStub) Create(p UserCreateParam) (string, error) {
@@ -24,6 +24,14 @@ func (urs *UserRepositoryStub) Create(p UserCreateParam) (string, error) {
 
 func (ures *UserRepositoryErrorStub) Create(p UserCreateParam) (string, error) {
 	return "", errors.New("User creation failed")
+}
+
+func (urs *UserRepositoryStub) FindByUser(u User) (string, error) {
+	return "test-user-id", nil
+}
+
+func (urs *UserRepositoryErrorStub) FindByUser(u User) (string, error) {
+	return "", errors.New("Not Exist")
 }
 
 func (ucr *UserCredentialRepositoryStub) Create(p UserCredentialCreateParam) error {
@@ -38,11 +46,19 @@ func (ucr *UserCredentialRepositoryStub) ExistsByEmail(email string) (bool, erro
 	}
 }
 
-func (atr *AccessTokenRepositoryStub) Create(p AccessTokenCreateParam) (AccessToken, error) {
+func (atr *AccessTokenRepositoryStub) Create(p AccessTokenParam) (AccessToken, error) {
 	return AccessToken{Id: "test-id", Token: "test-access-token", ExpiresAt: time.Now().Add(24 * time.Hour)}, nil
 }
 
-func (rtr *RefreshTokenRepositoryStub) Create(p RefreshTokenCreateParam) (RefreshToken, error) {
+func (atr *AccessTokenRepositoryStub) Update(p AccessTokenParam) (AccessToken, error) {
+	return AccessToken{Id: "test-id", Token: "test-access-token", ExpiresAt: time.Now().Add(24 * time.Hour)}, nil
+}
+
+func (rtr *RefreshTokenRepositoryStub) Create(p RefreshTokenParam) (RefreshToken, error) {
+	return RefreshToken{Id: "test-id", Token: "test-refresh-token", ExpiresAt: time.Now().Add(72 * time.Hour)}, nil
+}
+
+func (rtr *RefreshTokenRepositoryStub) Update(p RefreshTokenParam) (RefreshToken, error) {
 	return RefreshToken{Id: "test-id", Token: "test-refresh-token", ExpiresAt: time.Now().Add(72 * time.Hour)}, nil
 }
 
@@ -84,7 +100,7 @@ func TestUserServiceSignUp(t *testing.T) {
 			TransactionRepository:    tr,
 		}
 
-		authToken, err := us.SignUp(&SignUpUser{Email: "test@example.com", Password: "P@ssword"}, time.Now())
+		authToken, err := us.SignUp(&User{Email: "test@example.com", Password: "P@ssword"}, time.Now())
 		assert.Equal(t, authToken, AuthToken{AccessToken: "test-access-token", RefreshToken: "test-refresh-token"})
 		assert.Nil(t, err)
 	})
@@ -104,7 +120,49 @@ func TestUserServiceSignUp(t *testing.T) {
 			TransactionRepository:    tr,
 		}
 
-		authToken, err := us.SignUp(&SignUpUser{Email: "test@example.com", Password: "P@ssword"}, time.Now())
+		authToken, err := us.SignUp(&User{Email: "test@example.com", Password: "P@ssword"}, time.Now())
+		assert.Empty(t, authToken)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestUserServiceSignIn(t *testing.T) {
+	t.Run("When signin is successful", func(t *testing.T) {
+		ur := &UserRepositoryStub{}
+		ucr := &UserCredentialRepositoryStub{}
+		atr := &AccessTokenRepositoryStub{}
+		rtr := &RefreshTokenRepositoryStub{}
+		tr := &TransactionRepositoryStub{}
+
+		us := service.UserService{
+			UserRepository:           ur,
+			UserCredentialRepository: ucr,
+			AccessTokenRepository:    atr,
+			RefreshTokenRepository:   rtr,
+			TransactionRepository:    tr,
+		}
+
+		authToken, err := us.SignIn(&User{Email: "test@example.com", Password: "P@ssword"}, time.Now())
+		assert.Equal(t, authToken, AuthToken{AccessToken: "test-access-token", RefreshToken: "test-refresh-token"})
+		assert.Nil(t, err)
+	})
+
+	t.Run("When signin fails", func(t *testing.T) {
+		ur := &UserRepositoryErrorStub{}
+		ucr := &UserCredentialRepositoryStub{}
+		atr := &AccessTokenRepositoryStub{}
+		rtr := &RefreshTokenRepositoryStub{}
+		tr := &TransactionRepositoryStub{}
+
+		us := service.UserService{
+			UserRepository:           ur,
+			UserCredentialRepository: ucr,
+			AccessTokenRepository:    atr,
+			RefreshTokenRepository:   rtr,
+			TransactionRepository:    tr,
+		}
+
+		authToken, err := us.SignUp(&User{Email: "test@example.com", Password: "P@ssword"}, time.Now())
 		assert.Empty(t, authToken)
 		assert.NotNil(t, err)
 	})
