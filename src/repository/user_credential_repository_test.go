@@ -41,7 +41,7 @@ func TestUserCredentialRepositoryExistsByEmail(t *testing.T) {
 func TestUserCredentialRepositoryCreate(t *testing.T) {
 	d := db.NewPostgres()
 	ucr := repository.UserCredentialRepository{DB: d}
-	signUpUser := &model.SignUpUser{Email: "test@example.com", Password: "P@ssword"}
+	signUpUser := &model.User{Email: "test@example.com", Password: "P@ssword"}
 
 	t.Run("When not transaction", func(t *testing.T) {
 		var userId string

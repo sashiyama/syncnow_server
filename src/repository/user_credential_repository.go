@@ -11,7 +11,7 @@ type UserCredentialRepository struct {
 
 type UserCredentialCreateParam struct {
 	Tx     *sql.Tx
-	User   *SignUpUser
+	User   *User
 	UserId string
 }
 

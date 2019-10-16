@@ -9,7 +9,7 @@ import (
 )
 
 func (h *Handler) CreateUser(c echo.Context) (err error) {
-	u := new(SignUpUser)
+	u := new(User)
 	if err = c.Bind(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
