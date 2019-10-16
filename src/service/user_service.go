@@ -7,12 +7,33 @@ import (
 	"time"
 )
 
+type UserRepositoryIF interface {
+	Create(p repository.UserCreateParam) (string, error)
+}
+
+type UserCredentialRepositoryIF interface {
+	ExistsByEmail(email string) (bool, error)
+	Create(p repository.UserCredentialCreateParam) error
+}
+
+type AccessTokenRepositoryIF interface {
+	Create(p repository.AccessTokenCreateParam) (AccessToken, error)
+}
+
+type RefreshTokenRepositoryIF interface {
+	Create(p repository.RefreshTokenCreateParam) (RefreshToken, error)
+}
+
+type TransactionRepositoryIF interface {
+	Transaction(txFunc func(*sql.Tx) (interface{}, error)) (interface{}, error)
+}
+
 type UserService struct {
-	UserRepository           repository.UserRepository
-	UserCredentialRepository repository.UserCredentialRepository
-	AccessTokenRepository    repository.AccessTokenRepository
-	RefreshTokenRepository   repository.RefreshTokenRepository
-	TransactionRepository    repository.TransactionRepository
+	UserRepository           UserRepositoryIF
+	UserCredentialRepository UserCredentialRepositoryIF
+	AccessTokenRepository    AccessTokenRepositoryIF
+	RefreshTokenRepository   RefreshTokenRepositoryIF
+	TransactionRepository    TransactionRepositoryIF
 }
 
 func (us *UserService) IsRegistered(email string) (bool, error) {
@@ -23,10 +44,7 @@ func (us *UserService) IsRegistered(email string) (bool, error) {
 	return exists, err
 }
 
-func (us *UserService) SignUp(u *SignUpUser) (AuthToken, error) {
-	//TODO 現在時刻は外部入力にしたい
-	at := time.Now()
-
+func (us *UserService) SignUp(u *SignUpUser, at time.Time) (AuthToken, error) {
 	authToken, err := us.TransactionRepository.Transaction(func(tx *sql.Tx) (interface{}, error) {
 		userId, err := us.UserRepository.Create(repository.UserCreateParam{Tx: tx})
 		if err != nil {
