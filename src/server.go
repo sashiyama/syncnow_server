@@ -14,5 +14,5 @@ func main() {
 	middleware.Middlewares(e)
 	v1 := initializer.V1Handler()
 	router.Routes(e, &v1)
-	e.Logger.Fatal(e.Start(":3000"))
+	e.Logger.Fatal(e.Start(":80"))
 }
