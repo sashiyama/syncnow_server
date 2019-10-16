@@ -9,6 +9,7 @@ import (
 
 type UserRepositoryIF interface {
 	Create(p repository.UserCreateParam) (string, error)
+	FindByUser(u User) (string, error)
 }
 
 type UserCredentialRepositoryIF interface {
@@ -17,11 +18,13 @@ type UserCredentialRepositoryIF interface {
 }
 
 type AccessTokenRepositoryIF interface {
-	Create(p repository.AccessTokenCreateParam) (AccessToken, error)
+	Create(p repository.AccessTokenParam) (AccessToken, error)
+	Update(p repository.AccessTokenParam) (AccessToken, error)
 }
 
 type RefreshTokenRepositoryIF interface {
-	Create(p repository.RefreshTokenCreateParam) (RefreshToken, error)
+	Create(p repository.RefreshTokenParam) (RefreshToken, error)
+	Update(p repository.RefreshTokenParam) (RefreshToken, error)
 }
 
 type TransactionRepositoryIF interface {
@@ -44,7 +47,7 @@ func (us *UserService) IsRegistered(email string) (bool, error) {
 	return exists, err
 }
 
-func (us *UserService) SignUp(u *SignUpUser, at time.Time) (AuthToken, error) {
+func (us *UserService) SignUp(u *User, at time.Time) (AuthToken, error) {
 	authToken, err := us.TransactionRepository.Transaction(func(tx *sql.Tx) (interface{}, error) {
 		userId, err := us.UserRepository.Create(repository.UserCreateParam{Tx: tx})
 		if err != nil {
@@ -54,11 +57,37 @@ func (us *UserService) SignUp(u *SignUpUser, at time.Time) (AuthToken, error) {
 		if err != nil {
 			return nil, err
 		}
-		accessToken, err := us.AccessTokenRepository.Create(repository.AccessTokenCreateParam{Tx: tx, UserId: userId, At: at})
+		accessToken, err := us.AccessTokenRepository.Create(repository.AccessTokenParam{Tx: tx, UserId: userId, At: at})
 		if err != nil {
 			return nil, err
 		}
-		refreshToken, err := us.RefreshTokenRepository.Create(repository.RefreshTokenCreateParam{Tx: tx, AccessTokenId: accessToken.Id, At: at})
+		refreshToken, err := us.RefreshTokenRepository.Create(repository.RefreshTokenParam{Tx: tx, AccessTokenId: accessToken.Id, At: at})
+		if err != nil {
+			return nil, err
+		}
+
+		return AuthToken{AccessToken: accessToken.Token, RefreshToken: refreshToken.Token}, err
+	})
+
+	if token, ok := authToken.(AuthToken); ok {
+		return token, err
+	} else {
+		return AuthToken{}, err
+	}
+}
+
+func (us *UserService) SignIn(u *User, at time.Time) (AuthToken, error) {
+	userId, err := us.UserRepository.FindByUser(*u)
+	if err != nil {
+		return AuthToken{}, err
+	}
+
+	authToken, err := us.TransactionRepository.Transaction(func(tx *sql.Tx) (interface{}, error) {
+		accessToken, err := us.AccessTokenRepository.Update(repository.AccessTokenParam{Tx: tx, UserId: userId, At: at})
+		if err != nil {
+			return nil, err
+		}
+		refreshToken, err := us.RefreshTokenRepository.Update(repository.RefreshTokenParam{Tx: tx, AccessTokenId: accessToken.Id, At: at})
 		if err != nil {
 			return nil, err
 		}
