@@ -19,7 +19,7 @@ func TestAccessTokenRepositoryCreate(t *testing.T) {
 	t.Run("When not transaction", func(t *testing.T) {
 		var userId string
 		d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
-		p := repository.AccessTokenCreateParam{UserId: userId, At: time.Now()}
+		p := repository.AccessTokenParam{UserId: userId, At: time.Now()}
 
 		accessToken, err := atr.Create(p)
 
@@ -40,7 +40,7 @@ func TestAccessTokenRepositoryCreate(t *testing.T) {
 
 		tr := repository.TransactionRepository{DB: d}
 		accessToken, err := tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
-			p := repository.AccessTokenCreateParam{UserId: userId, At: time.Now(), Tx: tx}
+			p := repository.AccessTokenParam{UserId: userId, At: time.Now(), Tx: tx}
 			accessToken, err := atr.Create(p)
 			return accessToken, err
 		})
@@ -57,7 +57,7 @@ func TestAccessTokenRepositoryCreate(t *testing.T) {
 
 		tr := repository.TransactionRepository{DB: d}
 		_, err := tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
-			p := repository.AccessTokenCreateParam{UserId: userId, At: time.Now(), Tx: tx}
+			p := repository.AccessTokenParam{UserId: userId, At: time.Now(), Tx: tx}
 			accessToken, _ := atr.Create(p)
 			return accessToken, errors.New("User Access Token creation fails")
 		})
@@ -67,6 +67,43 @@ func TestAccessTokenRepositoryCreate(t *testing.T) {
 
 		assert.NotNil(t, err)
 		assert.Empty(t, id)
+
+		util.TruncateAllTables()
+	})
+}
+
+func TestAccessTokenRepositoryUpdate(t *testing.T) {
+	now := time.Now()
+	d := db.NewPostgres()
+	atr := repository.AccessTokenRepository{DB: d}
+
+	t.Run("When not transaction", func(t *testing.T) {
+		var userId string
+		d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
+		d.QueryRow("INSERT INTO user_access_tokens(id, user_id, token, expires_at) VALUES(DEFAULT, $1, DEFAULT, $2);", userId, now.Add(24*time.Hour))
+		p := repository.AccessTokenParam{UserId: userId, At: time.Now()}
+
+		accessToken, err := atr.Update(p)
+
+		assert.Nil(t, err)
+		assert.NotEmpty(t, accessToken.Token)
+
+		util.TruncateAllTables()
+	})
+
+	t.Run("When transaction and creation fails", func(t *testing.T) {
+		var userId string
+		d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
+		d.QueryRow("INSERT INTO user_access_tokens(id, user_id, token, expires_at) VALUES(DEFAULT, $1, DEFAULT, $2);", userId, now.Add(24*time.Hour))
+
+		tr := repository.TransactionRepository{DB: d}
+		_, err := tr.Transaction(func(tx *sql.Tx) (interface{}, error) {
+			p := repository.AccessTokenParam{UserId: userId, At: time.Now(), Tx: tx}
+			accessToken, _ := atr.Update(p)
+			return accessToken, errors.New("User Access Token creation fails")
+		})
+
+		assert.NotNil(t, err)
 
 		util.TruncateAllTables()
 	})
