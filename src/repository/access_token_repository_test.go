@@ -45,7 +45,7 @@ func TestAccessTokenRepositoryCreate(t *testing.T) {
 			return accessToken, err
 		})
 
-		assert.NotNil(t, err)
+		assert.Nil(t, err)
 		assert.NotEmpty(t, accessToken.(AccessToken).Token)
 
 		util.TruncateAllTables()
