@@ -2,15 +2,17 @@ package main
 
 import (
 	"github.com/labstack/echo"
+	"github.com/sashiyama/syncnow_server/initializer"
 	"github.com/sashiyama/syncnow_server/middleware"
 	"github.com/sashiyama/syncnow_server/router"
-	"github.com/sashiyama/syncnow_server/validators"
+	"github.com/sashiyama/syncnow_server/validator"
 )
 
 func main() {
 	e := echo.New()
-	e.Validator = validators.NewValidator()
+	e.Validator = validator.NewValidator()
 	middleware.Middlewares(e)
-	router.Routes(e)
-	e.Logger.Fatal(e.Start(":3000"))
+	v1 := initializer.V1Handler()
+	router.Routes(e, &v1)
+	e.Logger.Fatal(e.Start(":80"))
 }
