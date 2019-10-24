@@ -13,6 +13,8 @@ func Routes(e *echo.Echo, v1Handler *v1.Handler) {
 	v1Prefix.GET("/home", v1Handler.Home)
 
 	v1Prefix.POST("/users", v1Handler.CreateUser)
+	v1UsersMePrefix := v1Prefix.Group("/users/me")
+	v1UsersMePrefix.POST("/bonds", v1Handler.CreateBond)
 
 	v1Prefix.GET("/emails/:email", v1Handler.GetRegisteredEmail)
 

@@ -23,3 +23,17 @@ func (h *Handler) CreateUser(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusCreated, authToken)
 }
+
+func (h *Handler) currentUserId(c echo.Context) string {
+	requestToken, err := GetRequestTokenFromHeader(c.Request().Header)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+
+	id, err := h.UserService.GetUserIdByToken(requestToken.Token)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+
+	return id
+}
