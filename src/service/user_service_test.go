@@ -54,6 +54,10 @@ func (atr *AccessTokenRepositoryStub) Update(p AccessTokenParam) (AccessToken, e
 	return AccessToken{Id: "test-id", Token: "test-access-token", ExpiresAt: time.Now().Add(24 * time.Hour)}, nil
 }
 
+func (atr *AccessTokenRepositoryStub) FindByToken(token string) (AccessToken, error) {
+	return AccessToken{Id: "test-id", Token: "test-access-token", ExpiresAt: time.Now().Add(24 * time.Hour)}, nil
+}
+
 func (rtr *RefreshTokenRepositoryStub) Create(p RefreshTokenParam) (RefreshToken, error) {
 	return RefreshToken{Id: "test-id", Token: "test-refresh-token", ExpiresAt: time.Now().Add(72 * time.Hour)}, nil
 }
@@ -164,6 +168,48 @@ func TestUserServiceSignIn(t *testing.T) {
 
 		authToken, err := us.SignUp(&User{Email: "test@example.com", Password: "P@ssword"}, time.Now())
 		assert.Empty(t, authToken)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestUserServiceIsAuthorized(t *testing.T) {
+	t.Run("When authorized", func(t *testing.T) {
+		ur := &UserRepositoryStub{}
+		ucr := &UserCredentialRepositoryStub{}
+		atr := &AccessTokenRepositoryStub{}
+		rtr := &RefreshTokenRepositoryStub{}
+		tr := &TransactionRepositoryStub{}
+
+		us := service.UserService{
+			UserRepository:           ur,
+			UserCredentialRepository: ucr,
+			AccessTokenRepository:    atr,
+			RefreshTokenRepository:   rtr,
+			TransactionRepository:    tr,
+		}
+
+		isAuthorized, err := us.IsAuthorized("test-access-token", time.Now())
+		assert.Equal(t, isAuthorized, true)
+		assert.Nil(t, err)
+	})
+
+	t.Run("When not authorized", func(t *testing.T) {
+		ur := &UserRepositoryStub{}
+		ucr := &UserCredentialRepositoryStub{}
+		atr := &AccessTokenRepositoryStub{}
+		rtr := &RefreshTokenRepositoryStub{}
+		tr := &TransactionRepositoryStub{}
+
+		us := service.UserService{
+			UserRepository:           ur,
+			UserCredentialRepository: ucr,
+			AccessTokenRepository:    atr,
+			RefreshTokenRepository:   rtr,
+			TransactionRepository:    tr,
+		}
+
+		isAuthorized, err := us.IsAuthorized("test-access-token", time.Now().Add(72*time.Hour))
+		assert.Equal(t, isAuthorized, false)
 		assert.NotNil(t, err)
 	})
 }

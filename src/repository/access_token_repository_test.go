@@ -108,3 +108,29 @@ func TestAccessTokenRepositoryUpdate(t *testing.T) {
 		util.TruncateAllTables()
 	})
 }
+
+func TestAccessTokenRepositoryFindByToken(t *testing.T) {
+	now := time.Now()
+	d := db.NewPostgres()
+	atr := repository.AccessTokenRepository{DB: d}
+
+	t.Run("When exists", func(t *testing.T) {
+		var userId, token string
+		d.QueryRow("INSERT INTO users(id) VALUES(DEFAULT) RETURNING id;").Scan(&userId)
+		d.QueryRow("INSERT INTO user_access_tokens(id, user_id, token, expires_at) VALUES(DEFAULT, $1, DEFAULT, $2) RETURNING token;", userId, now.Add(24*time.Hour)).Scan(&token)
+
+		accessToken, err := atr.FindByToken(token)
+
+		assert.NotEmpty(t, accessToken)
+		assert.Nil(t, err)
+
+		util.TruncateAllTables()
+	})
+
+	t.Run("When not exists", func(t *testing.T) {
+		accessToken, err := atr.FindByToken("dummy-token")
+
+		assert.Empty(t, accessToken)
+		assert.NotNil(t, err)
+	})
+}
