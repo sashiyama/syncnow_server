@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS user_credentials (
     user_id uuid NOT NULL REFERENCES users(id),
     email character varying NOT NULL UNIQUE,
     password_digest character varying NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    created_at timestamp without time zone NOT NULL DEFAULT current_timestamp,
+    updated_at timestamp without time zone NOT NULL DEFAULT current_timestamp
 );

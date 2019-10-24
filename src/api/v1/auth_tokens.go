@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (h *Handler) CreateUser(c echo.Context) (err error) {
+func (h *Handler) CreateAuthToken(c echo.Context) (err error) {
 	u := new(User)
 	if err = c.Bind(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -16,7 +16,7 @@ func (h *Handler) CreateUser(c echo.Context) (err error) {
 	if err = c.Validate(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.(validator.ValidationErrors).Error())
 	}
-	authToken, err := h.UserService.SignUp(u, time.Now())
+	authToken, err := h.UserService.SignIn(u, time.Now())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
