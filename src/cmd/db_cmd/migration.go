@@ -61,3 +61,22 @@ func downMigrationsCmd() *cobra.Command {
 
 	return cmd
 }
+
+func forceMigrationsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "force_migration",
+		Short: "run force migration",
+		Args:  cobra.RangeArgs(1, 1), // database version
+		RunE: func(cmd *cobra.Command, args []string) error {
+			out, error := exec.Command("migrate", "-database", os.Getenv("POSTGRESQL_URL"), "-path", "db/migrations", "force", args[0]).CombinedOutput()
+			if error != nil {
+				fmt.Println("Command Exec Error.")
+			}
+			fmt.Printf("result: \n%s", string(out))
+
+			return nil
+		},
+	}
+
+	return cmd
+}

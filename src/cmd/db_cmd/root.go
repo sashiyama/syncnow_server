@@ -20,5 +20,6 @@ func init() {
 		createMigrationCmd(),
 		upMigrationsCmd(),
 		downMigrationsCmd(),
+		forceMigrationsCmd(),
 	)
 }
