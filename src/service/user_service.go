@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"errors"
 	. "github.com/sashiyama/syncnow_server/model"
 	"github.com/sashiyama/syncnow_server/repository"
 	"time"
@@ -20,6 +21,7 @@ type UserCredentialRepositoryIF interface {
 type AccessTokenRepositoryIF interface {
 	Create(p repository.AccessTokenParam) (AccessToken, error)
 	Update(p repository.AccessTokenParam) (AccessToken, error)
+	FindByToken(token string) (AccessToken, error)
 }
 
 type RefreshTokenRepositoryIF interface {
@@ -100,4 +102,18 @@ func (us *UserService) SignIn(u *User, at time.Time) (AuthToken, error) {
 	} else {
 		return AuthToken{}, err
 	}
+}
+
+func (us *UserService) IsAuthorized(token string, at time.Time) (bool, error) {
+	accessToken, err := us.AccessTokenRepository.FindByToken(token)
+
+	if err != nil {
+		return false, errors.New("Access token expired")
+	}
+
+	if at.After(accessToken.ExpiresAt) {
+		return false, errors.New("Access token expired")
+	}
+
+	return true, err
 }
