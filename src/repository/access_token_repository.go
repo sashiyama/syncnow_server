@@ -43,3 +43,10 @@ func (atr *AccessTokenRepository) Update(p AccessTokenParam) (AccessToken, error
 	}
 	return accessToken, err
 }
+
+func (atr *AccessTokenRepository) FindByToken(token string) (AccessToken, error) {
+	accessToken := AccessToken{}
+	query := "SELECT id, token, expires_at FROM user_access_tokens WHERE token = $1;"
+	err := atr.DB.QueryRow(query, token).Scan(&accessToken.Id, &accessToken.Token, &accessToken.ExpiresAt)
+	return accessToken, err
+}
