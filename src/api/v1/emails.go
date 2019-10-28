@@ -23,9 +23,5 @@ func (h *Handler) GetRegisteredEmail(c echo.Context) (err error) {
 		return echo.NewHTTPError(http.StatusBadRequest, err.(validator.ValidationErrors).Error())
 	}
 
-	if isRegistered {
-		return c.JSON(http.StatusOK, r)
-	} else {
-		return c.JSON(http.StatusNotFound, r)
-	}
+	return c.JSON(http.StatusOK, r)
 }
