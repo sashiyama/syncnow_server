@@ -7,6 +7,7 @@ import (
 
 func Routes(e *echo.Echo, v1Handler *v1.Handler) {
 	e.GET("/", v1Handler.Root)
+	e.GET("/health", v1Handler.Health)
 
 	v1Prefix := e.Group("/v1")
 	v1Prefix.GET("", v1Handler.Root)
