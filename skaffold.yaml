@@ -1,0 +1,31 @@
+apiVersion: skaffold/v1
+kind: Config
+profiles:
+  - name: syncnow-development
+    build:
+      artifacts:
+        - image: syncnow/webapi
+          context: src/
+      tagPolicy:
+        envTemplate:
+          template: "{{.IMAGE_NAME}}:latest"
+      local:
+        useBuildkit: true
+    deploy:
+      kustomize:
+        path: k8s/kustomize/web_api/overlays/development
+        flags:
+          apply:
+            - -f
+            - https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
+            - -f
+            - https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
+
+  - name: syncnow-production
+    build:
+      artifacts:
+        - image: syncnow/webapi
+          context: src/
+    deploy:
+      kustomize:
+        path: k8s/kustomize/web_api/overlays/production
