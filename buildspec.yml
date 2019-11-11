@@ -1,0 +1,29 @@
+version: 0.2
+
+env:
+  variables:
+    DOCKER_BUILDKIT: "1"
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+      ruby: 2.6
+  pre_build:
+    commands:
+      - echo Begin!
+  build:
+    commands:
+      - echo Test started on `date`
+      - echo Executing tests...
+      - docker-compose -f docker-compose.test.yml build --pull
+      - docker-compose -f docker-compose.test.yml run server go run cmd/db_cmd.go create_db syncnow_test
+      - docker-compose -f docker-compose.test.yml run server go run cmd/db_cmd.go up_migration
+      - docker-compose -f docker-compose.test.yml run server
+      - echo Test completed on `data`
+  post_build:
+    commands:
+      - echo Artifacts!
+      - echo '[{"name":"test","imageUri":"successful"}]' > imagedefinitions.json
+artifacts:
+    files: imagedefinitions.json

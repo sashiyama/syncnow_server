@@ -3,6 +3,7 @@ version: '3'
 services:
   server:
     build: .
+    entrypoint: ["dockerize", "-wait", "tcp://db:5432"]
     command: ["go", "test", "-v", "./..."]
     depends_on:
       - db
