@@ -1,6 +1,6 @@
 FROM golang:1.13.0-alpine3.10 as build
 ENV GOPATH=/golang
-ADD ./src /build
+ADD . /build
 WORKDIR /build
 RUN go build server.go
 
